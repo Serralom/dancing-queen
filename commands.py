@@ -1,7 +1,7 @@
 import re
 from telegram import Update
 from telegram.ext import ContextTypes
-from database.queries import save_results, get_ranking
+from database.queries import save_results, get_ranking, get_historical_ranking
 from utils import validate_name
 
 
@@ -67,20 +67,39 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.message.from_user.first_name  # Obtener el nombre del usuario desde Telegram
-    
-    # Obtener el ranking desde la base de datos, pasando el nombre de usuario
-    ranking = get_ranking(user_name)  # Pasar el nombre del usuario a la función
-    
-    # Formatear el ranking en un mensaje
-    if ranking:
-        ranking_message = "Ranking de Resultados:\n"
-        for idx, (nombre, juego_queens, juego_tango) in enumerate(ranking, start=1):
-            ranking_message += f"{idx}. {nombre} - Queens: {juego_queens}s | Tango: {juego_tango}s\n"
-    else:
-        ranking_message = "No hay resultados registrados aún."
 
+    # Obtener el ranking de hoy
+    ranking_hoy = get_ranking()
+
+    # Obtener el ranking histórico de victorias y los mejores tiempos
+    ranking_historico, tango_victories, queens_victories = get_historical_ranking()
+
+    # Mostrar los resultados de hoy
+    ranking_message = f"Ranking de hoy (para {user_name}):\n"
+    for idx, (nombre, juego_queens, juego_tango, fecha_hora) in enumerate(ranking_hoy, start=1):
+        ranking_message += f"{idx}. {nombre} - Queens: {juego_queens}s, Tango: {juego_tango}s (Fecha: {fecha_hora})\n"
+
+    # Mostrar el ranking histórico de victorias
+    ranking_message += "\nRanking histórico de victorias:\n"
+    for idx, (nombre, victorias) in enumerate(ranking_historico, start=1):
+        ranking_message += f"{idx}. {nombre} - Total victorias: {victorias}\n"
+
+    # Mostrar el ganador de cada edición de Tango
+    tango_message = "\nGanadores de Tango:\n"
+    for winner in tango_victories:
+        nombre, numero_juego, mejor_tiempo = winner
+        tango_message += f"Juego {numero_juego}: {nombre} - Tiempo: {mejor_tiempo}s\n"
+
+    # Mostrar el ganador de cada edición de Queens
+    queens_message = "\nGanadores de Queens:\n"
+    for winner in queens_victories:
+        nombre, numero_juego, mejor_tiempo = winner
+        queens_message += f"Juego {numero_juego}: {nombre} - Tiempo: {mejor_tiempo}s\n"
+
+    # Enviar los mensajes
     await update.message.reply_text(ranking_message)
-
+    await update.message.reply_text(tango_message)
+    await update.message.reply_text(queens_message)
 
 
 # Función para convertir MM:SS o SS a segundos

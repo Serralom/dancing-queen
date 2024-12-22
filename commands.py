@@ -18,12 +18,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def record_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.message.from_user.first_name
 
-    # Verificar si el usuario está autorizado usando la función validate_name
+    # Verificar si el usuario está autorizado
     if validate_name(user_name):
         # Explicar cómo enviar los tiempos para los dos juegos
         await update.message.reply_text(
-            "Para registrar los resultados, por favor, envía los tiempos de los dos juegos\n"
-            "Primero el tiempo del Queens, y posteriormente el tiempo del Tango\n"
+            "Para registrar los resultados, por favor, envía los tiempos de los dos juegos en el siguiente formato:\n"
             "Juego Queens: [Tiempo en formato MM:SS o SS]\n"
             "Juego Tango: [Tiempo en formato MM:SS o SS]\n"
             "Ejemplo: '1:25 85' o '85 1:25' (primer tiempo para Queens y segundo para Tango)"
@@ -51,7 +50,7 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
         queens_seconds = convert_to_seconds(queens_time)
         tango_seconds = convert_to_seconds(tango_time)
 
-        # Guardar los resultados en la base de datos
+        # Guardar los resultados en la base de datos, reemplazando el registro si ya existe
         save_results(user_name, queens_seconds, tango_seconds)
 
         await update.message.reply_text(
@@ -67,9 +66,11 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Obtener el ranking desde la base de datos
-    ranking = get_ranking()  # Esta función ya la tienes en db.py
-
+    user_name = update.message.from_user.first_name  # Obtener el nombre del usuario desde Telegram
+    
+    # Obtener el ranking desde la base de datos, pasando el nombre de usuario
+    ranking = get_ranking(user_name)  # Pasar el nombre del usuario a la función
+    
     # Formatear el ranking en un mensaje
     if ranking:
         ranking_message = "Ranking de Resultados:\n"
@@ -79,6 +80,7 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ranking_message = "No hay resultados registrados aún."
 
     await update.message.reply_text(ranking_message)
+
 
 
 # Función para convertir MM:SS o SS a segundos

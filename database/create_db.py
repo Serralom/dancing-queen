@@ -1,7 +1,7 @@
 import sqlite3
 
 # Conectar a la base de datos (esto la crea si no existe)
-conn = sqlite3.connect('dancing_queen.db')
+conn = sqlite3.connect('results.db')
 c = conn.cursor()
 
 # Crear la tabla si no existe

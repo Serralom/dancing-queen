@@ -29,14 +29,14 @@ def init_db():
                     juego_queens INTEGER,
                     juego_tango INTEGER,
                     fecha_hora TEXT)''')
-    
+
     c.execute('''CREATE TABLE IF NOT EXISTS victorias (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nombre TEXT,
                     juego TEXT,
                     numero_juego INTEGER,
                     tiempo INTEGER)''')  # Añadimos el número de juego y el tiempo
-    
+
     conn.commit()
     conn.close()
 
@@ -109,15 +109,15 @@ def get_historical_ranking():
     c = conn.cursor()
 
     # Obtener los mejores tiempos para cada número de juego de Tango
-    c.execute('''SELECT nombre, numero_juego, MIN(tiempo) as mejor_tiempo 
-                 FROM victorias WHERE juego = 'tango' 
+    c.execute('''SELECT nombre, numero_juego, MIN(tiempo) as mejor_tiempo
+                 FROM victorias WHERE juego = 'tango'
                  GROUP BY numero_juego, nombre
                  ORDER BY numero_juego''')
     tango_victories = c.fetchall()
 
     # Obtener los mejores tiempos para cada número de juego de Queens
-    c.execute('''SELECT nombre, numero_juego, MIN(tiempo) as mejor_tiempo 
-                 FROM victorias WHERE juego = 'queens' 
+    c.execute('''SELECT nombre, numero_juego, MIN(tiempo) as mejor_tiempo
+                 FROM victorias WHERE juego = 'queens'
                  GROUP BY numero_juego, nombre
                  ORDER BY numero_juego''')
     queens_victories = c.fetchall()
@@ -167,8 +167,8 @@ def get_average_times():
 
     # Consultar los tiempos promedio para 'queens' y 'tango'
     c.execute('''
-        SELECT nombre, 
-               AVG(CASE WHEN juego = 'queens' THEN tiempo END) AS avg_queens, 
+        SELECT nombre,
+               AVG(CASE WHEN juego = 'queens' THEN tiempo END) AS avg_queens,
                AVG(CASE WHEN juego = 'tango' THEN tiempo END) AS avg_tango
         FROM victorias
         GROUP BY nombre
@@ -178,7 +178,7 @@ def get_average_times():
     conn.close()
 
     # Crear un diccionario con los tiempos promedio por jugador
-    avg_times_dict = {nombre: {"avg_queens": avg_queens, "avg_tango": avg_tango} 
+    avg_times_dict = {nombre: {"avg_queens": avg_queens, "avg_tango": avg_tango}
                       for nombre, avg_queens, avg_tango in average_times}
 
     return avg_times_dict

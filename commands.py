@@ -117,7 +117,6 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         avg_tango_time = times["avg_tango"]
         avg_times_message += f"{nombre} - Promedio Queens: {avg_queens_time:.2f}s | Promedio Tango: {avg_tango_time:.2f}s\n"
 
-
     # Mostrar los tiempos promedio de Queens ordenados de menor a mayor
     avg_queens_message = "\nPromedio de Tiempos en Queens (de menor a mayor):\n"
     sorted_queens = sorted(avg_times_dict.items(), key=lambda x: x[1]["avg_queens"] if x[1]["avg_queens"] != "N/A" else float('inf'))
@@ -140,6 +139,7 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(avg_times_message)
     await update.message.reply_text(avg_queens_message)
     await update.message.reply_text(avg_tango_message)
+
 
 # Función para convertir MM:SS o SS a segundos
 def convert_to_seconds(time_str):

@@ -43,34 +43,44 @@ def init_db():
 
 # Definir la función para guardar los resultados
 def save_results(nombre, juego_queens, juego_tango):
+    # Obtener el inicio del día (9 AM del día actual o de ayer si es antes de las 9 AM)
+    start_of_day = get_start_of_day().to_datetime_string()
+
     # Obtener la fecha y hora actual en formato adecuado
     fecha_hora = pendulum.now().to_datetime_string()
 
-    # Usar las fechas fijas de referencia para cada juego
+    # Conectar a la base de datos
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    # Eliminar resultados anteriores del mismo día para el usuario
+    c.execute('''DELETE FROM resultados WHERE nombre = ? AND fecha_hora >= ?''', (nombre, start_of_day))
+
+    # Insertar los nuevos resultados en la tabla 'resultados'
+    c.execute('''INSERT INTO resultados (nombre, juego_queens, juego_tango, fecha_hora)
+                 VALUES (?, ?, ?, ?)''', (nombre, juego_queens, juego_tango, fecha_hora))
+    conn.commit()
+
+    # Guardar el número de juego correspondiente en la tabla de victorias
+    # Obtener las fechas base de Tango y Queens
     tango_base_date = pendulum.parse('2024-10-08')  # Fecha de referencia de Tango
     queens_base_date = pendulum.parse('2024-04-30')  # Fecha de referencia de Queens
 
     # Calcular el número de días transcurridos desde la fecha base de cada juego
-    now = pendulum.now()
-    tango_game_number = now.diff(tango_base_date).in_days()
-    queens_game_number = now.diff(queens_base_date).in_days()
+    tango_game_number = pendulum.now().diff(tango_base_date).in_days()
+    queens_game_number = pendulum.now().diff(queens_base_date).in_days()
 
-    # Guardar los resultados en la base de datos
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
+    # Eliminar las victorias anteriores del mismo día para el usuario en ambos juegos
+    c.execute('''DELETE FROM victorias WHERE nombre = ? AND numero_juego = ? AND juego = 'tango' ''', (nombre, tango_game_number))
+    c.execute('''DELETE FROM victorias WHERE nombre = ? AND numero_juego = ? AND juego = 'queens' ''', (nombre, queens_game_number))
 
-    # Insertar los resultados en la tabla 'resultados'
-    c.execute('''INSERT INTO resultados (nombre, juego_queens, juego_tango, fecha_hora)
-                 VALUES (?, ?, ?, ?)''', (nombre, queens_game_number, tango_game_number, fecha_hora))
-    conn.commit()
-
-    # Guardar el número de juego correspondiente en la tabla de victorias
-    # Guardamos los datos de victorias con el número de juego calculado
+    # Guardar los nuevos resultados en la tabla 'victorias'
     c.execute('''INSERT INTO victorias (nombre, juego, numero_juego, tiempo)
                  VALUES (?, ?, ?, ?)''', (nombre, 'tango', tango_game_number, juego_tango))
     c.execute('''INSERT INTO victorias (nombre, juego, numero_juego, tiempo)
                  VALUES (?, ?, ?, ?)''', (nombre, 'queens', queens_game_number, juego_queens))
 
+    # Confirmar los cambios y cerrar la conexión
     conn.commit()
     conn.close()
 
@@ -84,25 +94,13 @@ def get_ranking():
     # Conectar a la base de datos y obtener el ranking desde el inicio del día hasta ahora
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    
+
     # Ejecutar la consulta SQL para obtener los resultados del día
     c.execute("SELECT nombre, juego_queens, juego_tango FROM resultados WHERE fecha_hora >= ? ORDER BY fecha_hora ASC", (start_of_day,))
     ranking_hoy = c.fetchall()
     conn.close()
 
-    # Procesar los resultados para mostrar el ranking
-    if ranking_hoy:
-        print(ranking_hoy)
-        ranking_message = "Ranking de Resultados (Hoy):\n"
-        print(ranking_hoy)  # Esto se usa para depurar los resultados
-        for idx, (nombre, juego_queens, juego_tango) in enumerate(ranking_hoy, start=1):
-            ranking_message += f"{idx}. {nombre} - Queens: {juego_queens}s | Tango: {juego_tango}s\n"
-    else:
-        ranking_message = "No hay resultados registrados hoy."
-
-    return ranking_message
-
-
+    return ranking_hoy
 
 
 def get_historical_ranking():
@@ -135,3 +133,52 @@ def get_historical_ranking():
     conn.close()
     return ranking, tango_victories, queens_victories
 
+
+def get_top_precoces():
+    # Conectar a la base de datos
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    # Obtener el menor tiempo en Queens
+    c.execute('''SELECT MIN(tiempo) FROM victorias WHERE juego = 'queens' ''')
+    best_queens_time = c.fetchone()[0]
+
+    # Obtener el menor tiempo en Tango
+    c.execute('''SELECT MIN(tiempo) FROM victorias WHERE juego = 'tango' ''')
+    best_tango_time = c.fetchone()[0]
+
+    # Obtener todos los jugadores que lograron el mejor tiempo en Queens
+    c.execute('''SELECT nombre FROM victorias WHERE juego = 'queens' AND tiempo = ?''', (best_queens_time,))
+    best_queens_players = [row[0] for row in c.fetchall()]
+
+    # Obtener todos los jugadores que lograron el mejor tiempo en Tango
+    c.execute('''SELECT nombre FROM victorias WHERE juego = 'tango' AND tiempo = ?''', (best_tango_time,))
+    best_tango_players = [row[0] for row in c.fetchall()]
+
+    conn.close()
+
+    return best_queens_time, best_queens_players, best_tango_time, best_tango_players
+
+
+def get_average_times():
+    # Conectar a la base de datos y obtener los tiempos promedio por juego
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    # Consultar los tiempos promedio para 'queens' y 'tango'
+    c.execute('''
+        SELECT nombre, 
+               AVG(CASE WHEN juego = 'queens' THEN tiempo END) AS avg_queens, 
+               AVG(CASE WHEN juego = 'tango' THEN tiempo END) AS avg_tango
+        FROM victorias
+        GROUP BY nombre
+    ''')
+    average_times = c.fetchall()
+
+    conn.close()
+
+    # Crear un diccionario con los tiempos promedio por jugador
+    avg_times_dict = {nombre: {"avg_queens": avg_queens, "avg_tango": avg_tango} 
+                      for nombre, avg_queens, avg_tango in average_times}
+
+    return avg_times_dict

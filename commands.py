@@ -1,7 +1,7 @@
 import re
 from telegram import Update
 from telegram.ext import ContextTypes
-from database.queries import save_results, get_ranking, get_historical_ranking
+from database.queries import save_results, get_ranking, get_historical_ranking, get_top_precoces, get_average_times
 from utils import validate_name
 
 
@@ -74,33 +74,72 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Obtener el ranking histórico de victorias y los mejores tiempos
     ranking_historico, tango_victories, queens_victories = get_historical_ranking()
 
-    # Mostrar los resultados de hoy
-    ranking_message = f"Ranking de hoy (para {user_name}):\n"
-    for idx, (nombre, juego_queens, juego_tango, fecha_hora) in enumerate(ranking_hoy, start=1):
-        ranking_message += f"{idx}. {nombre} - Queens: {juego_queens}s, Tango: {juego_tango}s (Fecha: {fecha_hora})\n"
+    # Obtener los "Top Precoces"
+    best_queens_time, best_queens_players, best_tango_time, best_tango_players = get_top_precoces()
 
-    # Mostrar el ranking histórico de victorias
-    ranking_message += "\nRanking histórico de victorias:\n"
+    # Obtener los tiempos promedio por jugador
+    avg_times_dict = get_average_times()
+
+    # Procesar los resultados de hoy
+    ranking_message = f"Ranking de hoy (para {user_name}):\n"
+    if ranking_hoy:
+        for idx, (nombre, juego_queens, juego_tango) in enumerate(ranking_hoy, start=1):
+            ranking_message += f"{idx}. {nombre} - Queens: {juego_queens}s, Tango: {juego_tango}s\n"
+    else:
+        ranking_message += "No hay resultados registrados hoy.\n"
+
+    # Procesar el ranking histórico de victorias
+    ranking_message += "\nDancind Queens:\n"
     for idx, (nombre, victorias) in enumerate(ranking_historico, start=1):
         ranking_message += f"{idx}. {nombre} - Total victorias: {victorias}\n"
 
     # Mostrar el ganador de cada edición de Tango
-    tango_message = "\nGanadores de Tango:\n"
+    tango_message = "\nTango Dancers:\n"
     for winner in tango_victories:
         nombre, numero_juego, mejor_tiempo = winner
         tango_message += f"Juego {numero_juego}: {nombre} - Tiempo: {mejor_tiempo}s\n"
 
     # Mostrar el ganador de cada edición de Queens
-    queens_message = "\nGanadores de Queens:\n"
+    queens_message = "\nKings of Queens:\n"
     for winner in queens_victories:
         nombre, numero_juego, mejor_tiempo = winner
         queens_message += f"Juego {numero_juego}: {nombre} - Tiempo: {mejor_tiempo}s\n"
 
-    # Enviar los mensajes
-    await update.message.reply_text(ranking_message)
-    await update.message.reply_text(tango_message)
-    await update.message.reply_text(queens_message)
+    # Añadir los "Top Precoces" al mensaje
+    precoces_message = "\nTop Precoces:\n"
+    precoces_message += f"Queens: {best_queens_time}s ({', '.join(best_queens_players)})\n"
+    precoces_message += f"Tango: {best_tango_time}s ({', '.join(best_tango_players)})\n"
 
+    # Mostrar los tiempos promedio de cada jugador
+    avg_times_message = "\nTiempos promedio por jugador:\n"
+    for nombre, times in avg_times_dict.items():
+        avg_queens_time = times["avg_queens"]
+        avg_tango_time = times["avg_tango"]
+        avg_times_message += f"{nombre} - Promedio Queens: {avg_queens_time:.2f}s | Promedio Tango: {avg_tango_time:.2f}s\n"
+
+
+    # Mostrar los tiempos promedio de Queens ordenados de menor a mayor
+    avg_queens_message = "\nPromedio de Tiempos en Queens (de menor a mayor):\n"
+    sorted_queens = sorted(avg_times_dict.items(), key=lambda x: x[1]["avg_queens"] if x[1]["avg_queens"] != "N/A" else float('inf'))
+    for nombre, tiempos in sorted_queens:
+        avg_queens_time = tiempos["avg_queens"]
+        avg_queens_message += f"{nombre} - Promedio Queens: {avg_queens_time:.2f}s\n" if avg_queens_time != "N/A" else ""
+
+    # Mostrar los tiempos promedio de Tango ordenados de menor a mayor
+    avg_tango_message = "\nPromedio de Tiempos en Tango (de menor a mayor):\n"
+    sorted_tango = sorted(avg_times_dict.items(), key=lambda x: x[1]["avg_tango"] if x[1]["avg_tango"] != "N/A" else float('inf'))
+    for nombre, tiempos in sorted_tango:
+        avg_tango_time = tiempos["avg_tango"]
+        avg_tango_message += f"{nombre} - Promedio Tango: {avg_tango_time:.2f}s\n" if avg_tango_time != "N/A" else ""
+
+    # Enviar los mensajes
+    await update.message.reply_text(queens_message)
+    await update.message.reply_text(tango_message)
+    await update.message.reply_text(precoces_message)
+    await update.message.reply_text(ranking_message)
+    await update.message.reply_text(avg_times_message)
+    await update.message.reply_text(avg_queens_message)
+    await update.message.reply_text(avg_tango_message)
 
 # Función para convertir MM:SS o SS a segundos
 def convert_to_seconds(time_str):

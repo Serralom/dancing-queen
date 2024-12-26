@@ -1,8 +1,12 @@
+import os
 import logging
+from dotenv import load_dotenv
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from commands import record_results, handle_tiempos, start, results
 from database.queries import init_db
-from config import BOT_TOKEN
+
+load_dotenv()
+BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 # Configurar el logging para tener visibilidad de los errores
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

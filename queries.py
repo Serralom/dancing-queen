@@ -69,30 +69,30 @@ def save_results(nombre, juego, tiempo):
     c = conn.cursor()
 
     # Eliminar resultados anteriores del mismo día para el usuario
-    c.execute('''DELETE FROM resultados WHERE nombre = ? AND juego = ? AND fecha_hora >= ?''', (nombre, juego, start_of_day))
+    c.execute('''DELETE FROM public.resultados WHERE nombre = ? AND juego = ? AND fecha_hora >= ?''', (nombre, juego, start_of_day))
 
     # Insertar los nuevos resultados en la tabla 'resultados'
     if juego == "tango":
-        c.execute('''INSERT INTO resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
+        c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
                     VALUES (?, ?, ?, ?, ?)''', (nombre, juego, tango_game_number, tiempo, fecha_hora))
         conn.commit()
     else:
-        c.execute('''INSERT INTO resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
+        c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
                     VALUES (?, ?, ?, ?, ?)''', (nombre, juego, queens_game_number, tiempo, fecha_hora))
         conn.commit()
 
     # Eliminar las victorias anteriores del mismo día para el usuario en ambos juegos
-    c.execute('''DELETE FROM victorias WHERE numero_juego = ? AND juego = 'tango' ''', (tango_game_number,))
-    c.execute('''DELETE FROM victorias WHERE numero_juego = ? AND juego = 'queens' ''', (queens_game_number,))
+    c.execute('''DELETE FROM public.victorias WHERE numero_juego = ? AND juego = 'tango' ''', (tango_game_number,))
+    c.execute('''DELETE FROM public.victorias WHERE numero_juego = ? AND juego = 'queens' ''', (queens_game_number,))
 
     # Guardar los nuevos resultados en la tabla 'victorias'
-    c.execute('''INSERT INTO victorias (nombre, juego, numero_juego, tiempo)
+    c.execute('''INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
         SELECT nombre, juego, numero_juego, tiempo FROM (
-        SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM resultados)
+        SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM public.resultados)
         WHERE numero_juego = ? AND juego = 'queens' and rn = 1 ''', (queens_game_number,))
-    c.execute('''INSERT INTO victorias (nombre, juego, numero_juego, tiempo)
+    c.execute('''INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
         SELECT nombre, juego, numero_juego, tiempo FROM (
-        SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM resultados)
+        SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM public.resultados)
         WHERE numero_juego = ? AND juego = 'tango' and rn = 1 ''', (tango_game_number,))
 
     # Confirmar los cambios y cerrar la conexión
@@ -109,7 +109,7 @@ def get_ranking(juego):
     c = conn.cursor()
 
     # Ejecutar la consulta SQL para obtener los resultados del día
-    c.execute("SELECT nombre, tiempo FROM resultados WHERE fecha_hora >= ? AND juego = ? ORDER BY tiempo ASC", (start_of_day, juego))
+    c.execute("SELECT nombre, tiempo FROM public.resultados WHERE fecha_hora >= ? AND juego = ? ORDER BY tiempo ASC", (start_of_day, juego))
     ranking_hoy = c.fetchall()
     conn.close()
 
@@ -123,7 +123,7 @@ def get_historical_ranking():
 
     # Obtener los mejores tiempos para cada número de juego de Tango
     c.execute('''SELECT nombre, COUNT(*) as victorias
-        FROM victorias
+        FROM public.victorias
         WHERE juego = 'tango'
         GROUP BY nombre
         ORDER BY victorias DESC''')
@@ -131,7 +131,7 @@ def get_historical_ranking():
 
     # Obtener los mejores tiempos para cada número de juego de Queens
     c.execute('''SELECT nombre, COUNT(*) as victorias
-        FROM victorias
+        FROM public.victorias
         WHERE juego = 'queens'
         GROUP BY nombre
         ORDER BY victorias DESC''')
@@ -139,7 +139,7 @@ def get_historical_ranking():
 
     # Ahora sumamos las victorias por jugador
     c.execute('''SELECT nombre, COUNT(*) as victorias
-        FROM victorias
+        FROM public.victorias
         GROUP BY nombre
         ORDER BY victorias DESC''')
     ranking = c.fetchall()
@@ -154,19 +154,19 @@ def get_top_precoces():
     c = conn.cursor()
 
     # Obtener el menor tiempo en Queens
-    c.execute('''SELECT MIN(tiempo) FROM victorias WHERE juego = 'queens' ''')
+    c.execute('''SELECT MIN(tiempo) FROM public.victorias WHERE juego = 'queens' ''')
     best_queens_time = c.fetchone()[0]
 
     # Obtener el menor tiempo en Tango
-    c.execute('''SELECT MIN(tiempo) FROM victorias WHERE juego = 'tango' ''')
+    c.execute('''SELECT MIN(tiempo) FROM public.victorias WHERE juego = 'tango' ''')
     best_tango_time = c.fetchone()[0]
 
     # Obtener todos los jugadores que lograron el mejor tiempo en Queens
-    c.execute('''SELECT nombre FROM victorias WHERE juego = 'queens' AND tiempo = ?''', (best_queens_time,))
+    c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'queens' AND tiempo = ?''', (best_queens_time,))
     best_queens_players = [row[0] for row in c.fetchall()]
 
     # Obtener todos los jugadores que lograron el mejor tiempo en Tango
-    c.execute('''SELECT nombre FROM victorias WHERE juego = 'tango' AND tiempo = ?''', (best_tango_time,))
+    c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'tango' AND tiempo = ?''', (best_tango_time,))
     best_tango_players = [row[0] for row in c.fetchall()]
 
     conn.close()
@@ -184,7 +184,7 @@ def get_average_times():
         SELECT nombre,
                AVG(CASE WHEN juego = 'queens' THEN tiempo END) AS avg_queens,
                AVG(CASE WHEN juego = 'tango' THEN tiempo END) AS avg_tango
-        FROM resultados
+        FROM public.resultados
         GROUP BY nombre
     ''')
     average_times = c.fetchall()

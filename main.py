@@ -3,7 +3,7 @@ import logging
 from dotenv import load_dotenv
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from commands import record_results, handle_tiempos, start, results
-from database.queries import init_db
+from queries import init_db
 
 load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')

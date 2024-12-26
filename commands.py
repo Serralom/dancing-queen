@@ -1,7 +1,7 @@
 import re
 from telegram import Update
 from telegram.ext import ContextTypes
-from database.queries import save_results, get_ranking, get_historical_ranking, get_top_precoces, get_average_times
+from queries import save_results, get_ranking, get_historical_ranking, get_top_precoces, get_average_times
 from utils import validate_name
 
 

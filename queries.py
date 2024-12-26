@@ -33,7 +33,7 @@ def init_db():
 
     c.execute('''CREATE TABLE IF NOT EXISTS resultados (
         nombre TEXT,
-        juego INTEGER,
+        juego TEXT,
         numero_juego TEXT,
         tiempo INTEGER,
         fecha_hora TEXT)''')

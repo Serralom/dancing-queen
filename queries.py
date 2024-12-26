@@ -34,14 +34,14 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS resultados (
         nombre TEXT,
         juego TEXT,
-        numero_juego TEXT,
+        numero_juego INTEGER,
         tiempo INTEGER,
         fecha_hora TEXT)''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS victorias (
         nombre TEXT,
         juego TEXT,
-        numero_juego TEXT,
+        numero_juego INTEGER,
         tiempo INTEGER)''')
 
     conn.commit()

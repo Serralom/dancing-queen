@@ -28,10 +28,15 @@ async def record_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
         )
     else:
+        # await update.message.reply_text(
+        #     "No estás autorizado para registrar resultados. Espabila chaval."
+        # )
         await update.message.reply_text(
-            "No estás autorizado para registrar resultados. Espabila chaval."
+            "Para registrar los resultados, por favor, envía tus tiempos de hoy en Queens y en Tango\n"
+            "Primero el tiempo del Queens, después el tiempo del Tango\n"
+            "El tiempo ha de estar en formato MM:SS o SS, separados por un espacio (no usar , o .)\n"
+            "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
         )
-
 
 # Función para manejar la respuesta del usuario con los tiempos de los juegos
 async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):

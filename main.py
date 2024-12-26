@@ -27,7 +27,6 @@ application.add_handler(CommandHandler("results", results))
 # Comando /record y el manejo de los resultados
 application.add_handler(CommandHandler("record", record_results))
 
-
 # Agregar el handler para manejar los tiempos enviados
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_tiempos))
 

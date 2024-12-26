@@ -75,31 +75,31 @@ def save_results(nombre, juego, tiempo):
     c = conn.cursor()
 
     # Eliminar resultados anteriores del mismo día para el usuario
-    c.execute('''DELETE FROM public.resultados WHERE nombre = ? AND juego = ? AND fecha_hora >= ?''', (nombre, juego, start_of_day))
+    c.execute('''DELETE FROM public.resultados WHERE nombre = $1 AND juego = $2 AND fecha_hora >= $3''', (nombre, juego, start_of_day))
 
     # Insertar los nuevos resultados en la tabla 'resultados'
     if juego == "tango":
         c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
-                    VALUES (?, ?, ?, ?, ?)''', (nombre, juego, tango_game_number, tiempo, fecha_hora))
+                    VALUES ($1, $2, $3, $4, $5)''', (nombre, juego, tango_game_number, tiempo, fecha_hora))
         conn.commit()
     else:
         c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
-                    VALUES (?, ?, ?, ?, ?)''', (nombre, juego, queens_game_number, tiempo, fecha_hora))
+                    VALUES ($1, $2, $3, $4, $5)''', (nombre, juego, queens_game_number, tiempo, fecha_hora))
         conn.commit()
 
     # Eliminar las victorias anteriores del mismo día para el usuario en ambos juegos
-    c.execute('''DELETE FROM public.victorias WHERE numero_juego = ? AND juego = 'tango' ''', (tango_game_number,))
-    c.execute('''DELETE FROM public.victorias WHERE numero_juego = ? AND juego = 'queens' ''', (queens_game_number,))
+    c.execute('''DELETE FROM public.victorias WHERE numero_juego = $1 AND juego = 'tango' ''', (tango_game_number,))
+    c.execute('''DELETE FROM public.victorias WHERE numero_juego = $1 AND juego = 'queens' ''', (queens_game_number,))
 
     # Guardar los nuevos resultados en la tabla 'victorias'
     c.execute('''INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
         SELECT nombre, juego, numero_juego, tiempo FROM (
         SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM public.resultados)
-        WHERE numero_juego = ? AND juego = 'queens' and rn = 1 ''', (queens_game_number,))
+        WHERE numero_juego = $1 AND juego = 'queens' and rn = 1 ''', (queens_game_number,))
     c.execute('''INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
         SELECT nombre, juego, numero_juego, tiempo FROM (
         SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM public.resultados)
-        WHERE numero_juego = ? AND juego = 'tango' and rn = 1 ''', (tango_game_number,))
+        WHERE numero_juego = $1 AND juego = 'tango' and rn = 1 ''', (tango_game_number,))
 
     # Confirmar los cambios y cerrar la conexión
     conn.commit()
@@ -121,7 +121,7 @@ def get_ranking(juego):
     c = conn.cursor()
 
     # Ejecutar la consulta SQL para obtener los resultados del día
-    c.execute("SELECT nombre, tiempo FROM public.resultados WHERE fecha_hora >= ? AND juego = ? ORDER BY tiempo ASC", (start_of_day, juego))
+    c.execute("SELECT nombre, tiempo FROM public.resultados WHERE fecha_hora >= $ AND juego = $ ORDER BY tiempo ASC", (start_of_day, juego))
     ranking_hoy = c.fetchall()
     conn.close()
 
@@ -186,11 +186,11 @@ def get_top_precoces():
     best_tango_time = c.fetchone()[0]
 
     # Obtener todos los jugadores que lograron el mejor tiempo en Queens
-    c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'queens' AND tiempo = ?''', (best_queens_time,))
+    c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'queens' AND tiempo = $1''', (best_queens_time,))
     best_queens_players = [row[0] for row in c.fetchall()]
 
     # Obtener todos los jugadores que lograron el mejor tiempo en Tango
-    c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'tango' AND tiempo = ?''', (best_tango_time,))
+    c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'tango' AND tiempo = $1''', (best_tango_time,))
     best_tango_players = [row[0] for row in c.fetchall()]
 
     conn.close()

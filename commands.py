@@ -87,6 +87,7 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ranking_hoy_message += f"{ranking_message_queens}\n{ranking_message_tango}"
     else:
         ranking_hoy_message += "No hay resultados registrados hoy.\n"
+    await update.message.reply_text(ranking_hoy_message)
 
     historic_message = "\nTango Dancers: 🕺\n"
     for idx, (nombre, victorias) in enumerate(tango_victories, start=1):
@@ -99,10 +100,12 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     historic_message += "\nDancing Queens: 🏆\n"
     for idx, (nombre, victorias) in enumerate(ranking_historico, start=1):
         historic_message += f"{idx}. {nombre}: {victorias}\n"
+    await update.message.reply_text(historic_message)
 
     precoces_message = "\nTop Precoces: ⚡️🥵⌛️\n"
     precoces_message += f"Queens: {best_queens_time}s ({', '.join(best_queens_players)})\n"
     precoces_message += f"Tango: {best_tango_time}s ({', '.join(best_tango_players)})\n"
+    await update.message.reply_text(precoces_message)
 
     avg_queens_message = "\nPromedio Queens:\n"
     sorted_queens = sorted(avg_times_dict.items(), key=lambda x: x[1]["avg_queens"] if x[1]["avg_queens"] != "N/A" else float('inf'))
@@ -110,6 +113,7 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         avg_queens_time = tiempos["avg_queens"]
         if avg_queens_time is not None:
             avg_queens_message += f"{avg_queens_time:.2f}s - {nombre}\n" if avg_queens_time != "N/A" else ""
+    await update.message.reply_text(avg_queens_message)
 
     avg_tango_message = "\nPromedio Tango:\n"
     sorted_tango = sorted(avg_times_dict.items(), key=lambda x: x[1]["avg_tango"] if x[1]["avg_tango"] != "N/A" else float('inf'))
@@ -117,11 +121,6 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         avg_tango_time = tiempos["avg_tango"]
         if avg_tango_time is not None:
             avg_tango_message += f"{avg_tango_time:.2f}s - {nombre}\n" if avg_tango_time != "N/A" else ""
-
-    await update.message.reply_text(ranking_hoy_message)
-    await update.message.reply_text(historic_message)
-    await update.message.reply_text(precoces_message)
-    await update.message.reply_text(avg_queens_message)
     await update.message.reply_text(avg_tango_message)
 
 

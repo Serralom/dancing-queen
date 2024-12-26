@@ -65,7 +65,13 @@ def save_results(nombre, juego, tiempo):
     queens_game_number = pendulum.now().diff(queens_base_date).in_days()
 
     # Conectar a la base de datos
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        dbname=os.getenv('DATABASE_NAME'),
+        port=os.getenv('DATABASE_PORT')
+    )
     c = conn.cursor()
 
     # Eliminar resultados anteriores del mismo día para el usuario
@@ -105,7 +111,13 @@ def get_ranking(juego):
     start_of_day = get_start_of_day().to_datetime_string()
 
     # Conectar a la base de datos y obtener el ranking desde el inicio del día hasta ahora
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        dbname=os.getenv('DATABASE_NAME'),
+        port=os.getenv('DATABASE_PORT')
+    )
     c = conn.cursor()
 
     # Ejecutar la consulta SQL para obtener los resultados del día
@@ -118,7 +130,13 @@ def get_ranking(juego):
 
 def get_historical_ranking():
     # Conectar a la base de datos
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        dbname=os.getenv('DATABASE_NAME'),
+        port=os.getenv('DATABASE_PORT')
+    )
     c = conn.cursor()
 
     # Obtener los mejores tiempos para cada número de juego de Tango
@@ -150,7 +168,13 @@ def get_historical_ranking():
 
 def get_top_precoces():
     # Conectar a la base de datos
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        dbname=os.getenv('DATABASE_NAME'),
+        port=os.getenv('DATABASE_PORT')
+    )
     c = conn.cursor()
 
     # Obtener el menor tiempo en Queens
@@ -176,7 +200,13 @@ def get_top_precoces():
 
 def get_average_times():
     # Conectar a la base de datos y obtener los tiempos promedio por juego
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        dbname=os.getenv('DATABASE_NAME'),
+        port=os.getenv('DATABASE_PORT')
+    )
     c = conn.cursor()
 
     # Consultar los tiempos promedio para 'queens' y 'tango'

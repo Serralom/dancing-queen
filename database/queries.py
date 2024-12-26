@@ -93,8 +93,6 @@ def save_results(nombre, juego, tiempo):
     conn.commit()
     conn.close()
 
-    print(f"Datos guardados para {nombre}: Juego Queens #{queens_game_number}, Juego Tango #{tango_game_number}")
-
 
 def get_ranking(juego):
     # Obtener el inicio del día (9 AM del día actual o de ayer si es antes de las 9 AM)

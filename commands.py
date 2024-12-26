@@ -38,6 +38,7 @@ async def record_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
         )
 
+
 # Función para manejar la respuesta del usuario con los tiempos de los juegos
 async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.message.from_user.first_name

@@ -121,7 +121,7 @@ def get_ranking(juego):
     c = conn.cursor()
 
     # Ejecutar la consulta SQL para obtener los resultados del día
-    c.execute("SELECT nombre, tiempo FROM public.resultados WHERE fecha_hora >= $ AND juego = $ ORDER BY tiempo ASC", (start_of_day, juego))
+    c.execute("SELECT nombre, tiempo FROM public.resultados WHERE fecha_hora >= $1 AND juego = $2 ORDER BY tiempo ASC", (start_of_day, juego))
     ranking_hoy = c.fetchall()
     conn.close()
 

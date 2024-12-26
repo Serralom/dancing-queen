@@ -1,5 +1,7 @@
+import os
 import sqlite3
 import pendulum
+import psycopg2
 
 DB_NAME = "results.db"
 
@@ -20,23 +22,27 @@ def get_start_of_day():
 
 def init_db():
     # Inicializar la base de datos si no existe
-    conn = sqlite3.connect(DB_NAME)
+    conn = psycopg2.connect(
+        host=os.getenv('DATABASE_HOST'),
+        user=os.getenv('DATABASE_USER'),
+        password=os.getenv('DATABASE_PASSWORD'),
+        dbname=os.getenv('DATABASE_NAME'),
+        port=os.getenv('DATABASE_PORT')
+    )
     c = conn.cursor()
 
     c.execute('''CREATE TABLE IF NOT EXISTS resultados (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT,
-                    juego INTEGER,
-                    numero_juego TEXT,
-                    tiempo INTEGER,
-                    fecha_hora TEXT)''')
+        nombre TEXT,
+        juego INTEGER,
+        numero_juego TEXT,
+        tiempo INTEGER,
+        fecha_hora TEXT)''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS victorias (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT,
-                    juego TEXT,
-                    numero_juego TEXT,
-                    tiempo INTEGER)''')  # Añadimos el número de juego y el tiempo
+        nombre TEXT,
+        juego TEXT,
+        numero_juego TEXT,
+        tiempo INTEGER)''')
 
     conn.commit()
     conn.close()

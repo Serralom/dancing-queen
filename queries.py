@@ -62,8 +62,12 @@ def save_results(nombre, juego, tiempo):
     c = conn.cursor()
 
     c.execute('''DELETE FROM public.resultados WHERE nombre = %s AND juego = %s AND fecha_hora >= %s''', (nombre, juego, start_of_day))
-    c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
-        VALUES (%s, %s, %s, %s, %s)''', (nombre, juego, tango_game_number, tiempo, fecha_hora))
+    if juego == 'tango':
+        c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
+            VALUES (%s, %s, %s, %s, %s)''', (nombre, juego, tango_game_number, tiempo, fecha_hora))
+    else:
+        c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
+            VALUES (%s, %s, %s, %s, %s)''', (nombre, juego, queens_game_number, tiempo, fecha_hora))
     conn.commit()
 
     c.execute('''DELETE FROM public.victorias WHERE numero_juego = %s AND juego = 'tango' ''', (tango_game_number,))

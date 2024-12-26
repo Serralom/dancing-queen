@@ -178,7 +178,7 @@ def get_average_times():
         SELECT nombre,
                AVG(CASE WHEN juego = 'queens' THEN tiempo END) AS avg_queens,
                AVG(CASE WHEN juego = 'tango' THEN tiempo END) AS avg_tango
-        FROM victorias
+        FROM resultados
         GROUP BY nombre
     ''')
     average_times = c.fetchall()

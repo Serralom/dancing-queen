@@ -10,8 +10,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"¡Hola {user_name}!\n"
         "Para ver el ranking de resultados, usa el comando /results.\n"
-        "Para registrar tus tiempos, usa el comando /record, seguido de los tiempos de los dos juegos.\n"
-        "Por ejemplo: /record 1:30 85 (primer tiempo para Queens y segundo para Tango)."
+        "Para registrar tus tiempos, usa el comando /record."
     )
 
 
@@ -20,9 +19,9 @@ async def record_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if validate_name(user_name):
         await update.message.reply_text(
-            "Para registrar los resultados, por favor, envía tus tiempos de hoy en Queens y en Tango\n"
+            "Envía tus tiempos de hoy en Queens y en Tango\n"
             "Primero el tiempo del Queens, después el tiempo del Tango\n"
-            "El tiempo ha de estar en formato MM:SS o SS, separados por un espacio (no usar , o .)\n"
+            "El tiempo ha de estar en formato MM:SS o SS, separados entre sí por un espacio (no usar , o .)\n"
             "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
         )
     else:
@@ -30,9 +29,9 @@ async def record_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         #     "No estás autorizado para registrar resultados. Espabila chaval."
         # )
         await update.message.reply_text(
-            "Para registrar los resultados, por favor, envía tus tiempos de hoy en Queens y en Tango\n"
+            "Envía tus tiempos de hoy en Queens y en Tango\n"
             "Primero el tiempo del Queens, después el tiempo del Tango\n"
-            "El tiempo ha de estar en formato MM:SS o SS, separados por un espacio (no usar , o .)\n"
+            "El tiempo ha de estar en formato MM:SS o SS, separados entre sí por un espacio (no usar , o .)\n"
             "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
         )
 
@@ -68,12 +67,19 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = (
+        "🔎 *Resultados disponibles:*\n\n"
+        "/ranking_hoy - Ver el ranking de hoy\n"
+        "/ranking_historico - Ver el ranking histórico de victorias\n"
+        "/mejores_tiempos - Ver los mejores tiempos y promedips\n"
+        "/todo - Ver todo lo anterior\n"
+    )
+    await update.message.reply_text(message, parse_mode='MarkdownV2')
+    
+
+async def ranking_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ranking_queens = get_ranking("queens")
     ranking_tango = get_ranking("tango")
-    ranking_historico, tango_victories, queens_victories = get_historical_ranking()
-    best_queens_time, best_queens_players, best_tango_time, best_tango_players = get_top_precoces()
-    avg_times_dict = get_average_times()
-
     ranking_hoy_message = "Ranking de hoy:\n"
     if ranking_queens or ranking_tango:
         ranking_message_queens = "\nRanking Queens:\n"
@@ -89,6 +95,8 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ranking_hoy_message += "No hay resultados registrados hoy.\n"
     await update.message.reply_text(ranking_hoy_message)
 
+async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    ranking_historico, tango_victories, queens_victories = get_historical_ranking()
     historic_message = "\nTango Dancers: 🕺\n"
     for idx, (nombre, victorias) in enumerate(tango_victories, start=1):
         historic_message += f"{idx}. {nombre}: {victorias}\n"
@@ -102,6 +110,10 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         historic_message += f"{idx}. {nombre}: {victorias}\n"
     await update.message.reply_text(historic_message)
 
+
+async def mejores_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    best_queens_time, best_queens_players, best_tango_time, best_tango_players = get_top_precoces()
+    avg_times_dict = get_average_times()
     precoces_message = "\nTop Precoces: ⚡️🥵⌛️\n"
     precoces_message += f"Queens: {best_queens_time}s ({', '.join(best_queens_players)})\n"
     precoces_message += f"Tango: {best_tango_time}s ({', '.join(best_tango_players)})\n"
@@ -123,6 +135,11 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
             avg_tango_message += f"{avg_tango_time:.2f}s - {nombre}\n" if avg_tango_time != "N/A" else ""
     await update.message.reply_text(avg_tango_message)
 
+async def todo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await ranking_hoy(update, context)
+    await ranking_historico(update, context)
+    await mejores_tiempos(update, context)
+    
 
 def convert_to_seconds(time_str):
     if ':' in time_str:

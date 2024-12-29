@@ -45,7 +45,7 @@ def init_db():
 
 def save_results(nombre, juego, tiempo):
     start_of_day = get_start_of_day().to_datetime_string()
-    fecha_hora = pendulum.now().to_datetime_string()
+    fecha_hora = pendulum.now('Europe/Madrid').to_datetime_string()
     tango_base_date = pendulum.parse('2024-10-08')
     queens_base_date = pendulum.parse('2024-04-30')
     tango_game_number = pendulum.now().diff(tango_base_date).in_days()

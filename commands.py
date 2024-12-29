@@ -69,10 +69,10 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = (
         "🔎 *Resultados disponibles:*\n\n"
-        "/ranking_hoy - Ver el ranking de hoy\n"
-        "/ranking_historico - Ver el ranking histórico de victorias\n"
-        "/mejores_tiempos - Ver los mejores tiempos y promedips\n"
-        "/todo - Ver todo lo anterior\n"
+        "Ranking de hoy: /ranking_hoy\n"
+        "Rnking histórico de victorias: ranking_historico\n"
+        "Mejores tiempos y promedios: /mejores_tiempos\n"
+        "Todo lo anterior: /todo\n"
     )
     await update.message.reply_text(message, parse_mode='MarkdownV2')
     

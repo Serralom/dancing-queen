@@ -74,7 +74,7 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Mejores tiempos y promedios: /mejores_tiempos\n"
         "Todo lo anterior: /todo"
     )
-    await update.message.reply_text(message, parse_mode='MarkdownV2')
+    await update.message.reply_text(message)
 
     
 

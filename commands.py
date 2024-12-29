@@ -70,11 +70,12 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = (
         "🔎 *Resultados disponibles:*\n\n"
         "Ranking de hoy: /ranking_hoy\n"
-        "Rnking histórico de victorias: ranking_historico\n"
+        "Ranking histórico de victorias: /ranking_historico\n"
         "Mejores tiempos y promedios: /mejores_tiempos\n"
-        "Todo lo anterior: /todo\n"
+        "Todo lo anterior: /todo"
     )
     await update.message.reply_text(message, parse_mode='MarkdownV2')
+
     
 
 async def ranking_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):

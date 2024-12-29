@@ -68,7 +68,7 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = (
-        "🔎 *Resultados disponibles:*\n\n"
+        "🔎 Resultados disponibles:\n\n"
         "Ranking de hoy: /ranking_hoy\n"
         "Ranking histórico de victorias: /ranking_historico\n"
         "Mejores tiempos y promedios: /mejores_tiempos\n"

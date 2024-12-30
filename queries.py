@@ -72,14 +72,22 @@ def save_results(nombre, juego, tiempo):
 
     c.execute('''DELETE FROM public.victorias WHERE numero_juego = %s AND juego = 'tango' ''', (tango_game_number,))
     c.execute('''DELETE FROM public.victorias WHERE numero_juego = %s AND juego = 'queens' ''', (queens_game_number,))
-    c.execute('''INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
-        SELECT nombre, juego, numero_juego, tiempo FROM (
-        SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM public.resultados)
-        WHERE numero_juego = %s AND juego = 'queens' and rn = 1 ''', (queens_game_number,))
-    c.execute('''INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
-        SELECT nombre, juego, numero_juego, tiempo FROM (
-        SELECT nombre, juego, numero_juego, tiempo, ROW_NUMBER() OVER (PARTITION BY juego, numero_juego ORDER BY tiempo) AS rn FROM public.resultados)
-        WHERE numero_juego = %s AND juego = 'tango' and rn = 1 ''', (tango_game_number,))
+    c.execute('''
+        INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
+        SELECT nombre, juego, numero_juego, tiempo 
+        FROM public.resultados
+        WHERE numero_juego = %s AND juego = 'queens' 
+        AND tiempo = (SELECT MIN(tiempo) FROM public.resultados WHERE numero_juego = %s AND juego = 'queens')
+    ''', (queens_game_number, queens_game_number))
+
+    c.execute('''
+        INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
+        SELECT nombre, juego, numero_juego, tiempo 
+        FROM public.resultados
+        WHERE numero_juego = %s AND juego = 'tango' 
+        AND tiempo = (SELECT MIN(tiempo) FROM public.resultados WHERE numero_juego = %s AND juego = 'tango')
+    ''', (tango_game_number, tango_game_number))
+
 
     conn.commit()
     conn.close()

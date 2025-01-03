@@ -99,7 +99,9 @@ async def ranking_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def ranking_anual(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ranking_historico, tango_victories, queens_victories = get_historical_ranking()
-    historic_message = "\nTango Dancers: 🕺\n"
+
+    historic_message = "\nRanking Anual: 📅\n"
+    historic_message += "\nTango Dancers: 🕺\n"
     for idx, (nombre, victorias) in enumerate(tango_victories, start=1):
         historic_message += f"{idx}. {nombre}: {victorias}\n"
 
@@ -134,21 +136,31 @@ victorias_previas_tango = {
 
 async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ranking_historico, tango_victories, queens_victories = get_historical_ranking()
-    historic_message = "\nTango Dancers: 🕺\n"
-    for idx, (nombre, victorias) in enumerate(tango_victories, start=1):
-        victorias_totales = victorias + victorias_previas_tango.get(nombre, 0)
+
+    tango_victorias_totales = [(nombre, victorias + victorias_previas_tango.get(nombre, 0)) for nombre, victorias in tango_victories]
+    tango_victorias_totales_ordenadas = sorted(tango_victorias_totales, key=lambda x: x[1], reverse=True)
+
+    historic_message = "\nRanking Histórico: 📜\n"
+    historic_message += "\nTango Dancers: 🕺\n"
+    for idx, (nombre, victorias_totales) in enumerate(tango_victorias_totales_ordenadas, start=1):
         historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
+
+    queens_victorias_totales = [(nombre, victorias + victorias_previas_queens.get(nombre, 0)) for nombre, victorias in queens_victories]
+    queens_victorias_totales_ordenadas = sorted(queens_victorias_totales, key=lambda x: x[1], reverse=True)
 
     historic_message += "\nKings of Queens: 👑\n"
-    for idx, (nombre, victorias) in enumerate(queens_victories, start=1):
-        victorias_totales = victorias + victorias_previas_queens.get(nombre, 0)
+    for idx, (nombre, victorias_totales) in enumerate(queens_victorias_totales_ordenadas, start=1):
         historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
 
+    ranking_historico_totales = [(nombre, victorias + victorias_previas_tango.get(nombre, 0) + victorias_previas_queens.get(nombre, 0)) for nombre, victorias in ranking_historico]
+    ranking_historico_totales_ordenado = sorted(ranking_historico_totales, key=lambda x: x[1], reverse=True)
+
     historic_message += "\nDancing Queens: 🏆\n"
-    for idx, (nombre, victorias) in enumerate(ranking_historico, start=1):
-        victorias_totales = victorias + victorias_previas_tango.get(nombre, 0) + victorias_previas_queens.get(nombre, 0)
+    for idx, (nombre, victorias_totales) in enumerate(ranking_historico_totales_ordenado, start=1):
         historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
+
     await update.message.reply_text(historic_message)
+
 
 
 async def mejores_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):

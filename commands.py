@@ -70,6 +70,7 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = (
         "🔎 Resultados disponibles:\n\n"
         "Ranking de hoy: /ranking_hoy\n"
+        "Ranking anual de victorias: /ranking_anual\n"
         "Ranking histórico de victorias: /ranking_historico\n"
         "Mejores tiempos y promedios: /mejores_tiempos\n"
         "Todo lo anterior: /todo"
@@ -96,7 +97,7 @@ async def ranking_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ranking_hoy_message += "No hay resultados registrados hoy.\n"
     await update.message.reply_text(ranking_hoy_message)
 
-async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def ranking_anual(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ranking_historico, tango_victories, queens_victories = get_historical_ranking()
     historic_message = "\nTango Dancers: 🕺\n"
     for idx, (nombre, victorias) in enumerate(tango_victories, start=1):
@@ -109,6 +110,44 @@ async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
     historic_message += "\nDancing Queens: 🏆\n"
     for idx, (nombre, victorias) in enumerate(ranking_historico, start=1):
         historic_message += f"{idx}. {nombre}: {victorias}\n"
+    await update.message.reply_text(historic_message)
+
+victorias_previas_queens = {
+    "Miguel": 1,
+    "Carlos": 22,
+    "Miguel Serrano": 16,
+    "Pachu MS": 3,
+    "G.": 30,
+    "David": 21,
+    "Alejandro": 0,
+}
+
+victorias_previas_tango = {
+    "Miguel": 2,
+    "Carlos": 16,
+    "Miguel Serrano": 34,
+    "Pachu MS": 11,
+    "G.": 10,
+    "David": 12,
+    "Alejandro": 1,
+}
+
+async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    ranking_historico, tango_victories, queens_victories = get_historical_ranking()
+    historic_message = "\nTango Dancers: 🕺\n"
+    for idx, (nombre, victorias) in enumerate(tango_victories, start=1):
+        victorias_totales = victorias + victorias_previas_tango.get(nombre, 0)
+        historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
+
+    historic_message += "\nKings of Queens: 👑\n"
+    for idx, (nombre, victorias) in enumerate(queens_victories, start=1):
+        victorias_totales = victorias + victorias_previas_queens.get(nombre, 0)
+        historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
+
+    historic_message += "\nDancing Queens: 🏆\n"
+    for idx, (nombre, victorias) in enumerate(ranking_historico, start=1):
+        victorias_totales = victorias + victorias_previas_tango.get(nombre, 0) + victorias_previas_queens.get(nombre, 0)
+        historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
     await update.message.reply_text(historic_message)
 
 
@@ -138,6 +177,7 @@ async def mejores_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def todo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await ranking_hoy(update, context)
+    await ranking_anual(update, context)
     await ranking_historico(update, context)
     await mejores_tiempos(update, context)
     

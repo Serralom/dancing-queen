@@ -116,7 +116,7 @@ async def ranking_anual(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 victorias_previas_queens = {
     "Miguel": 1,
-    "Carlos": 22,
+    "Carlos Oliveira": 22,
     "Miguel Serrano": 16,
     "Pachu MS": 3,
     "G.": 30,
@@ -126,7 +126,7 @@ victorias_previas_queens = {
 
 victorias_previas_tango = {
     "Miguel": 2,
-    "Carlos": 16,
+    "Carlos Oliveira": 16,
     "Miguel Serrano": 34,
     "Pachu MS": 11,
     "G.": 10,

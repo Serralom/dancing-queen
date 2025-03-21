@@ -89,4 +89,3 @@ dancing-queen/
 - **Se recomienda PostgreSQL 12 o superior** para garantizar compatibilidad.
 - **El bot solo acepta tiempos en el formato adecuado** (Ej: `1:25 40` o `85 243`).
 
----

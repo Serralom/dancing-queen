@@ -19,10 +19,10 @@ async def record_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if validate_name(user_name):
         await update.message.reply_text(
-            "Envía tus tiempos de hoy en Queens y en Tango\n"
-            "Primero el tiempo del Queens, después el tiempo del Tango\n"
+            "Envía tus tiempos de hoy en Queens, Tango y Zip\n"
+            "Primero Queens, después Tango y por último Zip\n"
             "El tiempo ha de estar en formato MM:SS o SS, separados entre sí por un espacio (no usar , o .)\n"
-            "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
+            "Ejemplo: '1:25 40 33' o '85 243 100' (primer tiempo para Queens y segundo para Tango)"
         )
     else:
         # await update.message.reply_text(
@@ -42,22 +42,25 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = update.message.text
 
     # Expresión regular para capturar los tiempos
-    match = re.match(r"(\d+[:]\d+|\d+)\s+(\d+[:]\d+|\d+)", message_text)
-
+    match = re.match(r"(\d+[:]\d+|\d+)\s+(\d+[:]\d+|\d+)\s+(\d+[:]\d+|\d+)", message_text)
     if match:
         queens_time = match.group(1)
         tango_time = match.group(2)
+        zip_time = match.group(3)
 
         queens_seconds = convert_to_seconds(queens_time)
         tango_seconds = convert_to_seconds(tango_time)
+        zip_seconds = convert_to_seconds(zip_time)
 
         save_results(user_name, "tango", tango_seconds)
         save_results(user_name, "queens", queens_seconds)
+        save_results(user_name, "zip", zip_seconds)
 
         await update.message.reply_text(
             f"¡Resultados de {user_name} guardados correctamente!\n"
             f"Queens: {queens_seconds} segundos\n"
-            f"Tango: {tango_seconds} segundos"
+            f"Tango: {tango_seconds} segundos\n"
+            f"Zip: {zip_seconds} segundos"
         )
     else:
         await update.message.reply_text(

@@ -48,8 +48,10 @@ def save_results(nombre, juego, tiempo):
     fecha_hora = pendulum.now('Europe/Madrid').to_datetime_string()
     tango_base_date = pendulum.parse('2024-10-08')
     queens_base_date = pendulum.parse('2024-04-30')
+    zip_base_date = pendulum.parse('2025-03-17')
     tango_game_number = pendulum.now().diff(tango_base_date).in_days()
     queens_game_number = pendulum.now().diff(queens_base_date).in_days()
+    zip_game_number = pendulum.now().diff(zip_base_date).in_days()
     print(f"Nombre: {nombre}, Juego: {juego}, Fecha inicio del día: {start_of_day}")
 
     conn = psycopg2.connect(
@@ -65,6 +67,9 @@ def save_results(nombre, juego, tiempo):
     if juego == 'tango':
         c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
             VALUES (%s, %s, %s, %s, %s)''', (nombre, juego, tango_game_number, tiempo, fecha_hora))
+    elif juego == 'zip':
+        c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
+            VALUES (%s, %s, %s, %s, %s)''', (nombre, juego, zip_game_number, tiempo, fecha_hora))
     else:
         c.execute('''INSERT INTO public.resultados (nombre, juego, numero_juego, tiempo, fecha_hora)
             VALUES (%s, %s, %s, %s, %s)''', (nombre, juego, queens_game_number, tiempo, fecha_hora))
@@ -72,6 +77,7 @@ def save_results(nombre, juego, tiempo):
 
     c.execute('''DELETE FROM public.victorias WHERE numero_juego = %s AND juego = 'tango' ''', (tango_game_number,))
     c.execute('''DELETE FROM public.victorias WHERE numero_juego = %s AND juego = 'queens' ''', (queens_game_number,))
+    c.execute('''DELETE FROM public.victorias WHERE numero_juego = %s AND juego = 'zip' ''', (zip_game_number,))
     c.execute('''
         INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
         SELECT nombre, juego, numero_juego, tiempo 
@@ -87,7 +93,13 @@ def save_results(nombre, juego, tiempo):
         WHERE numero_juego = %s AND juego = 'tango' 
         AND tiempo = (SELECT MIN(tiempo) FROM public.resultados WHERE numero_juego = %s AND juego = 'tango')
     ''', (tango_game_number, tango_game_number))
-
+    c.execute('''
+        INSERT INTO public.victorias (nombre, juego, numero_juego, tiempo)
+        SELECT nombre, juego, numero_juego, tiempo 
+        FROM public.resultados
+        WHERE numero_juego = %s AND juego = 'zip' 
+        AND tiempo = (SELECT MIN(tiempo) FROM public.resultados WHERE numero_juego = %s AND juego = 'zip')
+    ''', (zip_game_number, zip_game_number))
 
     conn.commit()
     conn.close()
@@ -160,13 +172,17 @@ def get_top_precoces():
     best_queens_time = c.fetchone()[0]
     c.execute('''SELECT MIN(tiempo) FROM public.victorias WHERE juego = 'tango' ''')
     best_tango_time = c.fetchone()[0]
+    c.execute('''SELECT MIN(tiempo) FROM public.victorias WHERE juego = 'zip' ''')
+    best_zip_time = c.fetchone()[0]
     c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'queens' AND tiempo = %s''', (best_queens_time,))
     best_queens_players = [row[0] for row in c.fetchall()]
     c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'tango' AND tiempo = %s''', (best_tango_time,))
     best_tango_players = [row[0] for row in c.fetchall()]
+    c.execute('''SELECT nombre FROM public.victorias WHERE juego = 'zip' AND tiempo = %s''', (best_zip_time,))
+    best_zip_players = [row[0] for row in c.fetchall()]
     conn.close()
 
-    return best_queens_time, best_queens_players, best_tango_time, best_tango_players
+    return best_queens_time, best_queens_players, best_tango_time, best_tango_players, best_zip_time, best_zip_players
 
 
 def get_average_times():
@@ -183,12 +199,13 @@ def get_average_times():
         SELECT nombre,
                AVG(CASE WHEN juego = 'queens' THEN tiempo END) AS avg_queens,
                AVG(CASE WHEN juego = 'tango' THEN tiempo END) AS avg_tango
+               AVG(CASE WHEN juego = 'zip' THEN tiempo END) AS avg_zip
         FROM public.resultados
         GROUP BY nombre
     ''')
     average_times = c.fetchall()
-    avg_times_dict = {nombre: {"avg_queens": avg_queens, "avg_tango": avg_tango}
-                      for nombre, avg_queens, avg_tango in average_times}
+    avg_times_dict = {nombre: {"avg_queens": avg_queens, "avg_tango": avg_tango, "avg_zip": avg_zip}
+                      for nombre, avg_queens, avg_tango, avg_zip in average_times}
     conn.close()
 
     return avg_times_dict

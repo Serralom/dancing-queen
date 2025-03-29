@@ -101,7 +101,7 @@ async def ranking_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(ranking_hoy_message)
 
 async def ranking_anual(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    ranking_historico, tango_victories, queens_victories = get_historical_ranking()
+    ranking_historico, tango_victories, queens_victories, zip_victories = get_historical_ranking()
 
     historic_message = "\nRanking Anual: 📅\n"
     historic_message += "\nTango Dancers: 🕺\n"
@@ -110,6 +110,10 @@ async def ranking_anual(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     historic_message += "\nKings of Queens: 👑\n"
     for idx, (nombre, victorias) in enumerate(queens_victories, start=1):
+        historic_message += f"{idx}. {nombre}: {victorias}\n"
+
+    historic_message += "\nZip Zapper: 🤐\n"
+    for idx, (nombre, victorias) in enumerate(zip_victories, start=1):
         historic_message += f"{idx}. {nombre}: {victorias}\n"
 
     historic_message += "\nDancing Queens: 🏆\n"
@@ -137,8 +141,19 @@ victorias_previas_tango = {
     "Alejandro": 1,
 }
 
+victorias_previas_zip = {
+    "Miguel": 0,
+    "Carlos Oliveira": 2,
+    "Miguel Serrano": 2,
+    "Pachu MS": 0,
+    "G.": 2,
+    "David": 2,
+    "Alejandro": 1,
+}
+
+
 async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    ranking_historico, tango_victories, queens_victories = get_historical_ranking()
+    ranking_historico, tango_victories, queens_victories, zip_victories = get_historical_ranking()
 
     tango_victorias_totales = [(nombre, victorias + victorias_previas_tango.get(nombre, 0)) for nombre, victorias in tango_victories]
     tango_victorias_totales_ordenadas = sorted(tango_victorias_totales, key=lambda x: x[1], reverse=True)
@@ -155,6 +170,13 @@ async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for idx, (nombre, victorias_totales) in enumerate(queens_victorias_totales_ordenadas, start=1):
         historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
 
+    zip_victorias_totales = [(nombre, victorias + victorias_previas_zip.get(nombre, 0)) for nombre, victorias in zip_victories]
+    zip_victorias_totales_ordenadas = sorted(zip_victorias_totales, key=lambda x: x[1], reverse=True)
+
+    historic_message += "\nZip Zapper: 🤐\n"
+    for idx, (nombre, victorias_totales) in enumerate(zip_victorias_totales_ordenadas, start=1):
+        historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
+
     ranking_historico_totales = [(nombre, victorias + victorias_previas_tango.get(nombre, 0) + victorias_previas_queens.get(nombre, 0)) for nombre, victorias in ranking_historico]
     ranking_historico_totales_ordenado = sorted(ranking_historico_totales, key=lambda x: x[1], reverse=True)
 
@@ -165,13 +187,13 @@ async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(historic_message)
 
 
-
 async def mejores_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    best_queens_time, best_queens_players, best_tango_time, best_tango_players = get_top_precoces()
+    best_queens_time, best_queens_players, best_tango_time, best_tango_players, best_zip_time, best_zip_players = get_top_precoces()
     avg_times_dict = get_average_times()
     precoces_message = "\nTop Precoces: ⚡️🥵⌛️\n"
     precoces_message += f"Queens: {best_queens_time}s ({', '.join(best_queens_players)})\n"
     precoces_message += f"Tango: {best_tango_time}s ({', '.join(best_tango_players)})\n"
+    precoces_message += f"Zip: {best_zip_time}s ({', '.join(best_zip_players)})\n"
     await update.message.reply_text(precoces_message)
 
     avg_queens_message = "\nPromedio Queens:\n"
@@ -189,6 +211,15 @@ async def mejores_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if avg_tango_time is not None:
             avg_tango_message += f"{avg_tango_time:.2f}s - {nombre}\n" if avg_tango_time != "N/A" else ""
     await update.message.reply_text(avg_tango_message)
+
+    avg_zip_message = "\nPromedio Zip:\n"
+    sorted_zip = sorted(avg_times_dict.items(), key=lambda x: x[1]["avg_zip"] if x[1]["avg_zip"] != "N/A" else float('inf'))
+    for nombre, tiempos in sorted_zip:
+        avg_zip_time = tiempos["avg_zip"]
+        if avg_zip_time is not None:
+            avg_zip_message += f"{avg_zip_time:.2f}s - {nombre}\n" if avg_zip_time != "N/A" else ""
+    await update.message.reply_text(avg_zip_message)
+
 
 async def todo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await ranking_hoy(update, context)

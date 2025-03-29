@@ -85,8 +85,9 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ranking_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ranking_queens = get_ranking("queens")
     ranking_tango = get_ranking("tango")
+    ranking_zip = get_ranking("zip")
     ranking_hoy_message = "Ranking de hoy:\n"
-    if ranking_queens or ranking_tango:
+    if ranking_queens or ranking_tango or ranking_zip:
         ranking_message_queens = "\nRanking Queens:\n"
         for idx, (nombre, tiempo) in enumerate(ranking_queens, start=1):
             ranking_message_queens += f"{idx}. {tiempo}s {nombre}\n"
@@ -95,7 +96,11 @@ async def ranking_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for idx, (nombre, tiempo) in enumerate(ranking_tango, start=1):
             ranking_message_tango += f"{idx}. {tiempo}s {nombre}\n"
 
-        ranking_hoy_message += f"{ranking_message_queens}\n{ranking_message_tango}"
+        ranking_message_zip = "\nRanking Zip:\n"
+        for idx, (nombre, tiempo) in enumerate(ranking_zip, start=1):
+            ranking_message_zip += f"{idx}. {tiempo}s {nombre}\n"
+
+        ranking_hoy_message += f"{ranking_message_queens}\n{ranking_message_tango}\n{ranking_message_zip}"
     else:
         ranking_hoy_message += "No hay resultados registrados hoy.\n"
     await update.message.reply_text(ranking_hoy_message)

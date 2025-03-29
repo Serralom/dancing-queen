@@ -141,16 +141,6 @@ victorias_previas_tango = {
     "Alejandro": 1,
 }
 
-victorias_previas_zip = {
-    "Miguel": 0,
-    "Carlos Oliveira": 2,
-    "Miguel Serrano": 2,
-    "Pachu MS": 0,
-    "G.": 2,
-    "David": 2,
-    "Alejandro": 1,
-}
-
 
 async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ranking_historico, tango_victories, queens_victories, zip_victories = get_historical_ranking()
@@ -170,7 +160,7 @@ async def ranking_historico(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for idx, (nombre, victorias_totales) in enumerate(queens_victorias_totales_ordenadas, start=1):
         historic_message += f"{idx}. {nombre}: {victorias_totales}\n"
 
-    zip_victorias_totales = [(nombre, victorias + victorias_previas_zip.get(nombre, 0)) for nombre, victorias in zip_victories]
+    zip_victorias_totales = [(nombre, victorias) for nombre, victorias in zip_victories]
     zip_victorias_totales_ordenadas = sorted(zip_victorias_totales, key=lambda x: x[1], reverse=True)
 
     historic_message += "\nZip Zapper: 🤐\n"

@@ -211,8 +211,14 @@ def get_average_times():
         GROUP BY nombre
     ''')
     average_times = c.fetchall()
-    avg_times_dict = {nombre: {"avg_queens": avg_queens, "avg_tango": avg_tango, "avg_zip": avg_zip}
-                      for nombre, avg_queens, avg_tango, avg_zip in average_times}
+    avg_times_dict = {
+        nombre: {
+            "avg_queens": avg_queens if avg_queens is not None else "N/A",
+            "avg_tango": avg_tango if avg_tango is not None else "N/A",
+            "avg_zip": avg_zip if avg_zip is not None else "N/A"
+        }
+        for nombre, avg_queens, avg_tango, avg_zip in average_times
+    }
     conn.close()
 
     return avg_times_dict

@@ -1,10 +1,10 @@
 # 🕺 Dancing Queens - Telegram Bot
 
-**Dancing Queens** es un bot de **Telegram** desarrollado en **Python** que permite a los usuarios registrar y consultar los resultados de los **puzzles diarios de LinkedIn**, específicamente **"Queens" y "Tango"**. Utiliza **PostgreSQL** para gestionar los datos y está diseñado con una arquitectura modular y buenas prácticas de desarrollo.
+**Dancing Queens** es un bot de **Telegram** desarrollado en **Python** que permite a los usuarios registrar y consultar los resultados de los **puzzles diarios de LinkedIn**, específicamente **Queens**, **Tango** y **Zip**. Utiliza **PostgreSQL** para gestionar los datos y está diseñado con una arquitectura modular y buenas prácticas de desarrollo.
 
 ## ✨ Características
 
-- 📊 Registro de tiempos de los juegos **Queens** y **Tango**.
+- 📊 Registro de tiempos de los juegos **Queens**, **Tango** y **Zip**.
 - 🏆 Consulta de rankings diarios, anuales e históricos.
 - ⚡ Visualización de los mejores tiempos y promedios de los jugadores.
 - 🗄️ Base de datos PostgreSQL con consultas optimizadas.

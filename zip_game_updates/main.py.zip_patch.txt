@@ -1,3 +1,0 @@
-
-# No requiere cambios a menos que añadas nuevos comandos específicos para Zip.
-# La función handle_tiempos ya gestiona los tres juegos a través del mensaje de texto.

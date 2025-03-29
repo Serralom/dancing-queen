@@ -22,17 +22,17 @@ async def record_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Envía tus tiempos de hoy en Queens, Tango y Zip\n"
             "Primero Queens, después Tango y por último Zip\n"
             "El tiempo ha de estar en formato MM:SS o SS, separados entre sí por un espacio (no usar , o .)\n"
-            "Ejemplo: '1:25 40 33' o '85 243 100' (primer tiempo para Queens y segundo para Tango)"
+            "Ejemplo: '1:25 40 33' o '85 243 100' (primer tiempo para Queens, segundo para Tango y tercero para Zip)"
         )
     else:
         # await update.message.reply_text(
         #     "No estás autorizado para registrar resultados. Espabila chaval."
         # )
         await update.message.reply_text(
-            "Envía tus tiempos de hoy en Queens y en Tango\n"
-            "Primero el tiempo del Queens, después el tiempo del Tango\n"
+            "Envía tus tiempos de hoy en Queens, Tango y Zip\n"
+            "Primero Queens, después Tango y por último Zip\n"
             "El tiempo ha de estar en formato MM:SS o SS, separados entre sí por un espacio (no usar , o .)\n"
-            "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
+            "Ejemplo: '1:25 40 33' o '85 243 100' (primer tiempo para Queens, segundo para Tango y tercero para Zip)"
         )
 
 
@@ -64,8 +64,8 @@ async def handle_tiempos(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     else:
         await update.message.reply_text(
-            "Por favor, envía los tiempos en el formato correcto: 'Tiempo Queens' 'Tiempo Tango'.\n"
-            "Ejemplo: '1:25 40' o '85 243' (primer tiempo para Queens y segundo para Tango)"
+            "Por favor, envía los tiempos en el formato correcto: 'Tiempo Queens' 'Tiempo Tango' 'Tiempo Zip'.\n"
+            "Ejemplo: '1:25 40 33' o '85 243 100' (primer tiempo para Queens, segundo para Tango y tercero para Zip)"
         )
 
 

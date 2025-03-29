@@ -48,7 +48,7 @@ def save_results(nombre, juego, tiempo):
     fecha_hora = pendulum.now('Europe/Madrid').to_datetime_string()
     tango_base_date = pendulum.parse('2024-10-08')
     queens_base_date = pendulum.parse('2024-04-30')
-    zip_base_date = pendulum.parse('2025-03-17')
+    zip_base_date = pendulum.parse('2025-03-18')
     tango_game_number = pendulum.now().diff(tango_base_date).in_days()
     queens_game_number = pendulum.now().diff(queens_base_date).in_days()
     zip_game_number = pendulum.now().diff(zip_base_date).in_days()
@@ -150,12 +150,19 @@ def get_historical_ranking():
 
     c.execute('''SELECT nombre, COUNT(*) as victorias
         FROM public.victorias
+        WHERE juego = 'zip'
+        GROUP BY nombre
+        ORDER BY victorias DESC''')
+    zip_victories = c.fetchall()
+
+    c.execute('''SELECT nombre, COUNT(*) as victorias
+        FROM public.victorias
         GROUP BY nombre
         ORDER BY victorias DESC''')
     ranking = c.fetchall()
     conn.close()
 
-    return ranking, tango_victories, queens_victories
+    return ranking, tango_victories, queens_victories, zip_victories
 
 
 def get_top_precoces():

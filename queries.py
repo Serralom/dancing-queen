@@ -205,7 +205,7 @@ def get_average_times():
     c.execute('''
         SELECT nombre,
                AVG(CASE WHEN juego = 'queens' THEN tiempo END) AS avg_queens,
-               AVG(CASE WHEN juego = 'tango' THEN tiempo END) AS avg_tango
+               AVG(CASE WHEN juego = 'tango' THEN tiempo END) AS avg_tango,
                AVG(CASE WHEN juego = 'zip' THEN tiempo END) AS avg_zip
         FROM public.resultados
         GROUP BY nombre
